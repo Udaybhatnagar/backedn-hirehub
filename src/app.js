@@ -27,4 +27,7 @@ app.use("/api/hire", hireRoutes)
 app.use("/api/trainings", trainingRoutes)
 app.use("/api/applications", applicationRoutes)
 
+// Health check — required for Render to confirm the service is alive
+app.get("/", (req, res) => res.json({ status: "HireHub API is running 🚀" }))
+
 module.exports = app
