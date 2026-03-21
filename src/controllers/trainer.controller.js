@@ -67,3 +67,62 @@ exports.uploadResume = async (req, res) => {
     res.status(500).json({ message: "Failed to upload resume", error: err.message })
   }
 }
+
+// PATCH /api/trainers/bookmark/:trainingId — toggle bookmark
+exports.toggleBookmark = async (req, res) => {
+  try {
+    const User = require("../models/User.model")
+    const Trainer = require("../models/Trainer.model")
+    const user = await User.findById(req.user.id)
+    // Upsert: create a minimal profile if one does not exist
+    let trainer = await Trainer.findOneAndUpdate(
+      { userId: req.user.id },
+      { $setOnInsert: { name: user?.name || 'Trainer', userId: req.user.id } },
+      { upsert: true, new: true }
+    )
+
+    const id = req.params.trainingId
+    const idx = trainer.bookmarkedTrainings.findIndex(b => b.toString() === id)
+    if (idx === -1) {
+      trainer.bookmarkedTrainings.push(id)
+    } else {
+      trainer.bookmarkedTrainings.splice(idx, 1)
+    }
+    await trainer.save()
+    res.json({ bookmarked: idx === -1, bookmarkedTrainings: trainer.bookmarkedTrainings })
+  } catch (err) {
+    res.status(500).json({ message: "Failed to toggle bookmark", error: err.message })
+  }
+}
+
+// GET /api/trainers/bookmarks — get bookmarked trainings
+exports.getBookmarks = async (req, res) => {
+  try {
+    const Trainer = require("../models/Trainer.model")
+    const trainer = await Trainer.findOne({ userId: req.user.id }).populate("bookmarkedTrainings")
+    if (!trainer) return res.json([]) // No profile yet — return empty array
+    res.json(trainer.bookmarkedTrainings || [])
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch bookmarks", error: err.message })
+  }
+}
+
+// POST /api/trainers/profile-image — upload profile picture
+exports.uploadProfileImage = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No file uploaded" })
+    const User = require("../models/User.model")
+    const Trainer = require("../models/Trainer.model")
+    const user = await User.findById(req.user.id)
+    const imageUrl = `/uploads/images/${req.file.filename}`
+    // Upsert: create a minimal profile if one does not exist
+    const trainer = await Trainer.findOneAndUpdate(
+      { userId: req.user.id },
+      { image: imageUrl, $setOnInsert: { name: user?.name || 'Trainer', userId: req.user.id } },
+      { upsert: true, new: true }
+    )
+    res.json({ message: "Profile image uploaded", imageUrl, trainer })
+  } catch (err) {
+    res.status(500).json({ message: "Failed to upload image", error: err.message })
+  }
+}

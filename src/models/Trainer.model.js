@@ -30,6 +30,30 @@ const trainerSchema = new mongoose.Schema(
       website: { type: String, default: "" },
     },
     resumeUrl: { type: String, default: "" },
+    // Extended personal info
+    phone: { type: String, default: "" },
+    nationality: { type: String, default: "" },
+    gender: { type: String, default: "" },
+    maritalStatus: { type: String, default: "" },
+    dateOfBirth: { type: String, default: "" },
+    education: { type: String, default: "" },
+    personalWebsite: { type: String, default: "" },
+    // Social links (flexible array)
+    socialLinks: [
+      {
+        platform: { type: String, default: "" },
+        url: { type: String, default: "" },
+      },
+    ],
+    // Account settings
+    jobAlertTitle: { type: String, default: "" },
+    jobAlertLocation: { type: String, default: "" },
+    profileVisible: { type: Boolean, default: true },
+    resumeVisible: { type: Boolean, default: true },
+    notifyNewJobs: { type: Boolean, default: true },
+    notifyApplications: { type: Boolean, default: true },
+    notifyJobAlerts: { type: Boolean, default: true },
+    bookmarkedTrainings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Training' }],
   },
   { timestamps: true }
 )
