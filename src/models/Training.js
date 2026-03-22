@@ -21,6 +21,7 @@ const trainingSchema = new mongoose.Schema(
     salaryMax: { type: Number, default: 0 },
     tags: [{ type: String }],
     description: { type: String, default: "" },
+    duration: { type: String, default: "" },
     rating: { type: Number, default: 0 },
     reviews: { type: Number, default: 0 },
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

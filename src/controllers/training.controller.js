@@ -10,6 +10,17 @@ exports.getAllTrainings = async (req, res) => {
   }
 }
 
+// GET /api/trainings/:id — public
+exports.getTrainingById = async (req, res) => {
+  try {
+    const training = await Training.findById(req.params.id)
+    if (!training) return res.status(404).json({ message: "Training not found" })
+    res.json(training)
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch training", error: err.message })
+  }
+}
+
 // POST /api/trainings — organization only (protected)
 exports.addTraining = async (req, res) => {
   try {
