@@ -2,6 +2,7 @@ const router = require("express").Router()
 const {
   getAllTrainers,
   getTrainerById,
+  getTrainerBySlug,
   createOrUpdateProfile,
   getMyProfile,
   uploadResume,
@@ -29,6 +30,9 @@ router.post("/profile-image", protect, requireRole("trainer"), uploadImage.singl
 // Protected — bookmarks
 router.patch("/bookmark/:trainingId", protect, requireRole("trainer"), toggleBookmark)
 router.get("/bookmarks", protect, requireRole("trainer"), getBookmarks)
+
+// Public — get single trainer by slug (for portfolio pages) — MUST be before /:id
+router.get("/slug/:slug", getTrainerBySlug)
 
 // Public — get single trainer by ID
 router.get("/:id", getTrainerById)

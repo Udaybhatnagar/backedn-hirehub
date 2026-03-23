@@ -1,5 +1,27 @@
 const Trainer = require("../models/Trainer.model")
 
+// Helper: generate a URL-friendly slug from a name
+// If the base slug (e.g. "john-doe") is already taken by a different trainer,
+// append the last 4 chars of the MongoDB _id to ensure uniqueness.
+async function generateSlug(name, trainerId) {
+  const base = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+
+  // Check if base slug is free (or already belongs to this trainer)
+  const existing = await Trainer.findOne({ slug: base })
+  if (!existing || existing._id.toString() === trainerId.toString()) {
+    return base
+  }
+
+  // Slug is taken by another trainer — append 4-char suffix from _id
+  const suffix = trainerId.toString().slice(-4)
+  return `${base}-${suffix}`
+}
+
 // GET /api/trainers — public
 exports.getAllTrainers = async (req, res) => {
   try {
@@ -27,15 +49,37 @@ exports.createOrUpdateProfile = async (req, res) => {
     const userId = req.user.id
     const data = req.body
 
-    const trainer = await Trainer.findOneAndUpdate(
+    // Upsert first to get/create the _id we need for slug generation
+    let trainer = await Trainer.findOneAndUpdate(
       { userId },
       { ...data, userId },
       { upsert: true, new: true, runValidators: true }
     )
 
+    // Auto-generate slug if missing or if name changed
+    if (!trainer.slug || data.name) {
+      const slug = await generateSlug(trainer.name, trainer._id)
+      trainer = await Trainer.findByIdAndUpdate(
+        trainer._id,
+        { slug },
+        { new: true }
+      )
+    }
+
     res.json({ message: "Profile saved", trainer })
   } catch (err) {
     res.status(500).json({ message: "Failed to save profile", error: err.message })
+  }
+}
+
+// GET /api/trainers/slug/:slug — public, for portfolio pages
+exports.getTrainerBySlug = async (req, res) => {
+  try {
+    const trainer = await Trainer.findOne({ slug: req.params.slug })
+    if (!trainer) return res.status(404).json({ message: "Trainer not found" })
+    res.json(trainer)
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch trainer", error: err.message })
   }
 }
 
