@@ -73,9 +73,17 @@ exports.createOrUpdateProfile = async (req, res) => {
 }
 
 // GET /api/trainers/slug/:slug — public, for portfolio pages
+// Falls back to finding by _id if no slug match is found (for trainers without a slug)
 exports.getTrainerBySlug = async (req, res) => {
   try {
-    const trainer = await Trainer.findOne({ slug: req.params.slug })
+    const { slug } = req.params
+    let trainer = await Trainer.findOne({ slug })
+
+    // Fallback: if no slug match, try treating the param as a MongoDB _id
+    if (!trainer && slug.match(/^[a-f\d]{24}$/i)) {
+      trainer = await Trainer.findById(slug)
+    }
+
     if (!trainer) return res.status(404).json({ message: "Trainer not found" })
     res.json(trainer)
   } catch (err) {
