@@ -110,7 +110,7 @@ exports.uploadResume = async (req, res) => {
     }
     const trainer = await Trainer.findOneAndUpdate(
       { userId: req.user.id },
-      { resumeUrl: req.file.filename },
+      { resumeUrl: `resumes/${req.file.filename}` },
       { new: true }
     )
     if (!trainer) return res.status(404).json({ message: "Trainer profile not found. Please create your profile first." })
