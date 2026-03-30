@@ -4,14 +4,12 @@ const { protect } = require("../middleware/auth");
 const passport = require("../config/passport");
 const jwt = require("jsonwebtoken");
 
-// ================= ROUTES =================
+// ================= STANDARD AUTH ROUTES =================
 router.post("/register", register);
 router.post("/verify-otp", verifyOtp);
 router.post("/resend-otp", resendOtp);
 router.post("/login", login);
 router.patch("/change-password", protect, changePassword);
-
-module.exports = router;
 
 // ================= GOOGLE OAUTH =================
 
@@ -20,7 +18,7 @@ router.get("/google",
     passport.authenticate("google", { scope: ["profile", "email"] })
 );
 
-// Step 2: Callback from Google — use custom callback to handle errors properly
+// Step 2: Callback from Google
 router.get("/google/callback",
     (req, res, next) => {
         passport.authenticate("google", { session: false }, (err, user, info) => {
