@@ -19,22 +19,19 @@ connectDB();
 
 const app = express();
 
-const ALLOWED_ORIGINS = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://hire-hub-beta-kohl.vercel.app",  // Production frontend
-  process.env.FRONTEND_URL,                  // Any extra URL via env var
-].filter(Boolean);
+// ── Startup diagnostics ────────────────────────────────────────────
+console.log('🔍 ENV CHECK:');
+console.log('  MONGO_URI:', process.env.MONGO_URI ? '✅ set' : '❌ MISSING');
+console.log('  JWT_SECRET:', process.env.JWT_SECRET ? '✅ set' : '❌ MISSING');
+console.log('  GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? '✅ set' : '⚠️  not set (OAuth disabled)');
+console.log('  FRONTEND_URL:', process.env.FRONTEND_URL || '(not set - using hardcoded)');
 
+// ── CORS: allow all origins (reflect) so credentials work everywhere ──
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    return callback(new Error(`CORS: origin ${origin} not allowed`));
-  },
+  origin: true,  // reflects the request origin — works with credentials
   credentials: true,
 }));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
