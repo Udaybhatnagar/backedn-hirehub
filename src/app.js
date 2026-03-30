@@ -22,7 +22,8 @@ const app = express();
 const ALLOWED_ORIGINS = [
   "http://localhost:5173",
   "http://localhost:3000",
-  process.env.FRONTEND_URL,          // e.g. https://hire-hub-beta-kohl.vercel.app
+  "https://hire-hub-beta-kohl.vercel.app",  // Production frontend
+  process.env.FRONTEND_URL,                  // Any extra URL via env var
 ].filter(Boolean);
 
 app.use(cors({
