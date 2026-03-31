@@ -39,8 +39,8 @@ const sendOtpEmail = async (to, otp) => {
         </div>
         <h2 style="text-align:center; color:#10b981; margin-bottom:8px;">Verify Your Email</h2>
         <p style="text-align:center; color:#9ca3af; margin-bottom:32px;">Enter the OTP below to complete your registration. It expires in <strong style="color:#fff">10 minutes</strong>.</p>
-        <div style="background:#1A1D1C; border:1px solid #374151; border-radius:12px; padding:24px; text-align:center; margin-bottom:32px;">
-          <span style="font-size:42px; font-weight:900; letter-spacing:12px; color:#10b981;">${otp}</span>
+        <div style="display:inline-block; background:#1A1D1C; border:1px solid #10b981; border-radius:10px; padding:14px 28px; margin-bottom:28px; box-shadow:0 0 16px rgba(16,185,129,0.15);">
+          <span style="font-size:30px; font-weight:800; letter-spacing:8px; color:#10b981; font-family:monospace;">${otp}</span>
         </div>
         <p style="text-align:center; color:#6b7280; font-size:13px;">If you did not request this, please ignore this email.</p>
         <hr style="border-color:#374151; margin:24px 0;" />
