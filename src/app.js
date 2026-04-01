@@ -14,6 +14,7 @@ const hireRoutes         = require("./routes/hire.routes");
 const trainingRoutes     = require("./routes/training.routes");
 const applicationRoutes  = require("./routes/application.routes");
 const organizationRoutes = require("./routes/organization.routes");
+const contactRoutes      = require("./routes/contact.routes");
 
 connectDB();
 
@@ -48,6 +49,7 @@ app.use("/api/hire",          hireRoutes);
 app.use("/api/trainings",     trainingRoutes);
 app.use("/api/applications",  applicationRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/contact",       contactRoutes);
 
 // ================= GOOGLE OAUTH ROUTE PREFIX =================
 // ⚠️ IMPORTANT: OAuth routes should NOT be under /api
