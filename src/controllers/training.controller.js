@@ -1,10 +1,23 @@
 const Training = require("../models/Training")
+const OrgProfile = require("../models/OrgProfile.model")
+
+// Helper: attach org logo to a plain training object
+async function attachLogo(training) {
+  const obj = training.toObject ? training.toObject() : { ...training }
+  if (obj.logo) return obj // already has a logo
+  try {
+    const org = await OrgProfile.findOne({ userId: obj.postedBy }).select("logo").lean()
+    if (org && org.logo) obj.logo = org.logo
+  } catch {}
+  return obj
+}
 
 // GET /api/trainings — public
 exports.getAllTrainings = async (req, res) => {
   try {
     const trainings = await Training.find().sort({ createdAt: -1 })
-    res.json(trainings)
+    const withLogos = await Promise.all(trainings.map(attachLogo))
+    res.json(withLogos)
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch trainings", error: err.message })
   }
@@ -15,7 +28,8 @@ exports.getTrainingById = async (req, res) => {
   try {
     const training = await Training.findById(req.params.id)
     if (!training) return res.status(404).json({ message: "Training not found" })
-    res.json(training)
+    const withLogo = await attachLogo(training)
+    res.json(withLogo)
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch training", error: err.message })
   }
@@ -24,8 +38,18 @@ exports.getTrainingById = async (req, res) => {
 // POST /api/trainings — organization only (protected)
 exports.addTraining = async (req, res) => {
   try {
+    // Fetch the org's logo so it's embedded directly on the training
+    let logo = req.body.logo || ''
+    if (!logo) {
+      try {
+        const orgProfile = await OrgProfile.findOne({ userId: req.user.id }).select('logo').lean()
+        if (orgProfile?.logo) logo = orgProfile.logo
+      } catch {}
+    }
+
     const training = await Training.create({
       ...req.body,
+      logo,
       postedBy: req.user.id,
       postedAt: "Just now",
     })
