@@ -26,6 +26,7 @@ const trainingSchema = new mongoose.Schema(
     reviews: { type: Number, default: 0 },
     postedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     postedAt: { type: String, default: "Just now" },
+    isExpired: { type: Boolean, default: false },
   },
   { timestamps: true }
 )

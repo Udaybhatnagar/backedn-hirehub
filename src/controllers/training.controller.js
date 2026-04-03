@@ -8,7 +8,9 @@ async function attachLogo(training) {
   try {
     const org = await OrgProfile.findOne({ userId: obj.postedBy }).select("logo").lean()
     if (org && org.logo) obj.logo = org.logo
-  } catch {}
+  } catch (err) {
+    // silently skip — logo just won't show
+  }
   return obj
 }
 
@@ -83,5 +85,20 @@ exports.deleteTraining = async (req, res) => {
     res.json({ message: "Training deleted" })
   } catch (err) {
     res.status(500).json({ message: "Failed to delete training", error: err.message })
+  }
+}
+// PATCH /api/trainings/:id/expire — org toggles expired status
+exports.expireTraining = async (req, res) => {
+  try {
+    const training = await Training.findById(req.params.id)
+    if (!training) return res.status(404).json({ message: "Training not found" })
+    if (training.postedBy.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" })
+    }
+    training.isExpired = !training.isExpired
+    await training.save()
+    res.json({ message: `Training marked as ${training.isExpired ? "expired" : "active"}`, training })
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update training", error: err.message })
   }
 }

@@ -3,7 +3,13 @@ const OrgProfile = require("../models/OrgProfile.model")
 // ── GET /api/organizations/profile ─────────────────────────────────────────────
 const getProfile = async (req, res) => {
   try {
-    const profile = await OrgProfile.findOne({ userId: req.user._id })
+    // Try both _id (ObjectId) and id (string) forms for robustness
+    const profile = await OrgProfile.findOne({
+      $or: [
+        { userId: req.user._id },
+        { userId: req.user.id },
+      ]
+    })
     res.json(profile || {})
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch profile" })
@@ -26,7 +32,10 @@ const saveProfile = async (req, res) => {
 
     const profile = await OrgProfile.findOneAndUpdate(
       { userId: req.user._id },
-      { $set: update },
+      {
+        $set: update,
+        $setOnInsert: { userId: req.user._id || req.user.id }, // ensure userId set on first create
+      },
       { new: true, upsert: true, runValidators: true }
     )
 
@@ -52,7 +61,10 @@ const uploadLogo = async (req, res) => {
 
     const profile = await OrgProfile.findOneAndUpdate(
       { userId: req.user._id },
-      { $set: { logo: logoUrl } },
+      {
+        $set: { logo: logoUrl },
+        $setOnInsert: { userId: req.user._id || req.user.id }, // ensure userId set on first create
+      },
       { new: true, upsert: true }
     )
 
